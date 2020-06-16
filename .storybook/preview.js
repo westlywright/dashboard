@@ -1,7 +1,7 @@
 import { addParameters } from '@storybook/vue';
 
-import '!style-loader!css-loader!sass-loader!../assets/storybook-styles/storybook.scss';
-import '!style-loader!css-loader!sass-loader!../assets/styles/app.scss';
+import '@/assets/storybook-styles/storybook.scss';
+import '@/assets/styles/app.scss';
 
 
 addParameters({
