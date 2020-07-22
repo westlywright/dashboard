@@ -1,4 +1,5 @@
 <script>
+import { findBy } from '@/utils/array';
 import { isEmpty, find, isNaN } from 'lodash';
 import ArrayList from '@/components/form/ArrayList';
 import CreateEditView from '@/mixins/create-edit-view';
@@ -111,6 +112,23 @@ export default {
   },
 
   watch: {
+    // TODO - reset config if we go back to step 1
+    // '$route.query.step'(val) {
+    //   console.log('Router step: ', val);
+    // },
+    'value.metadata.name': {
+      handler(val, oldVal) {
+        const defineServiceStep = findBy(( this?.steps || []), 'name', 'define-service');
+
+        if (isEmpty(val)) {
+          defineServiceStep.ready = false;
+        } else if (!isEmpty(defineServiceStep)) {
+          defineServiceStep.ready = true;
+        }
+      },
+      deep: true
+    },
+
     'value.spec.sessionAffinity'(val) {
       if (val === CLUSTERIP) {
         this.value.spec.sessionAffinityConfig = { clientIP: { timeoutSeconds: null } };

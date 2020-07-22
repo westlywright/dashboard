@@ -1,7 +1,10 @@
 import isEmpty from 'lodash/isEmpty';
 import { validateDnsLabel } from '@/utils/validators';
 
-export function servicePort(ports, getters, errors, validatorArgs) {
+export function servicePort(ports, resource, validatorArgs) {
+  const errors = [];
+  const { $rootGetters: getters } = resource;
+
   if (isEmpty(ports)) {
     errors.push(getters['i18n/t']('validation.required', { key: 'Port Rules' }));
 

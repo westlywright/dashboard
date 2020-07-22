@@ -48,11 +48,18 @@ export default {
       },
       {
         nullable:       false,
-        path:           'spec.ports',
-        required:       true,
-        type:           'array',
-        validators:     ['servicePort'],
-      }
+        path:           'spec.clusterIP',
+        translationKey: 'servicesPage.serviceTypes.clusterIp',
+        type:           'string',
+        validators:     ['clusterIp']
+      },
+      // {
+      //   nullable:       false,
+      //   path:           'spec.ports',
+      //   required:       true,
+      //   type:           'array',
+      //   validators:     ['servicePort'],
+      // }
     ];
   },
 

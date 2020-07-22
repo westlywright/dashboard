@@ -769,6 +769,7 @@ validation:
   noSchema: No schema found to validate
   required: '"{key}" is required'
   requiredOrOverride: '"{key}" is required or must allow override'
+  ipAddress: '"{key}" requires a valid IPv4 or IPv6 address'
   arrayLength:
     exactly: '"{key}" should contain {count, plural, =1 {# item} other {# items}}'
     between: '"{key}" should contain between {min} and {max} {max, plural, =1 {item} other {items}}'
@@ -814,6 +815,7 @@ validation:
   targets:
     missingProjectId: A target must have a project selected.
   service:
+    type: Service must have a type.
     ports:
       name:
         required: "Port Rule [{position}] - Name is required."
