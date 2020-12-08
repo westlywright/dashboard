@@ -1,4 +1,5 @@
 <script>
+import { createPopper } from '@popperjs/core';
 import { get } from '@/utils/object';
 import isString from 'lodash/isString';
 import VueSelectOverrides from '@/mixins/vue-select-overrides';
@@ -8,7 +9,7 @@ export default {
   props:  {
     buttonLabel: {
       default: '',
-      type:    String,
+      type:    String
     },
     closeOnSelect: {
       default: true,
@@ -16,32 +17,38 @@ export default {
     },
     disabled: {
       default: false,
-      type:    Boolean,
+      type:    Boolean
     },
     // array of option objects containing at least a label and link, but also icon and action are available
     dropdownOptions: {
       // required: true,
       default: () => [],
-      type:    Array,
+      type:    Array
     },
     optionKey: {
       default: null,
-      type:    String,
+      type:    String
     },
     optionLabel: {
       default: 'label',
-      type:    String,
+      type:    String
+    },
+    // if you need to replace the placement for whatever reason remember to replace wiht *-start otherwise dd options get centered on the trigger.
+    placement: {
+      default: 'bottom-start',
+      type:    String
     },
     // sm, null(med), lg - no xs...its so small
     size: {
       default: null,
-      type:    String,
+      type:    String
     },
     value: {
       default: null,
-      type:    String,
-    },
+      type:    String
+    }
   },
+
   data() {
     return { focused: false };
   },
@@ -91,12 +98,58 @@ export default {
       this.$nextTick(() => {
         const el = this.$refs['button-dropdown'].searchEl;
 
-        if ( el ) {
+        if (el) {
           el.focus();
         }
       });
     },
     get,
+    withPopper(dropdownList, component, { width, top, left }) {
+      /**
+       * We need to explicitly define the dropdown width since
+       * it is usually inherited from the parent with CSS.
+       */
+      dropdownList.style.width = 'auto';
+
+      /**
+       * Here we position the dropdownList relative to the $refs.toggle Element.
+       *
+       * The 'offset' modifier aligns the dropdown so that the $refs.toggle and
+       * the dropdownList overlap by 1 pixel.
+       *
+       * The 'toggleClass' modifier adds a 'drop-up' class to the Vue Select
+       * wrapper so that we can set some styles for when the dropdown is placed
+       * above.
+       */
+      // debugger;
+      const popper = createPopper(component.$refs.toggle, dropdownList, {
+        placement: this.placement,
+        modifiers: [
+          {
+            name:    'offset',
+            options: { offset: [-2, 2] },
+          },
+          // {
+          //   name:    'preventOverflow',
+          //   options: { mainAxis: false },
+          // },
+          {
+            name:    'toggleClass',
+            enabled: true,
+            phase:   'write',
+            fn({ state }) {
+              component.$el.setAttribute('x-placement', state.placement);
+            },
+          },
+        ],
+      });
+
+      /**
+       * To prevent memory leaks Popper needs to be destroyed.
+       * If you return function, it will be called just before dropdown is removed from DOM.
+       */
+      return () => popper.destroy();
+    },
   },
 };
 </script>
@@ -112,6 +165,8 @@ export default {
       'btn-lg': size === 'lg',
     }"
     v-bind="$attrs"
+    :append-to-body="!!placement"
+    :calculate-position="placement ? withPopper : undefined"
     :searchable="false"
     :clearable="false"
     :close-on-select="closeOnSelect"
@@ -177,10 +232,28 @@ export default {
   &.vs--open ::v-deep {
     outline: none;
     border: var(--outline-width) solid var(--outline);
-    border-bottom: none;
     box-shadow: none;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+
+    &[x-placement*='top'] {
+      border-top: none;
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+    &[x-placement*='bottom'] {
+      border-bottom: none;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+    &[x-placement*='right'] {
+      border-right: none;
+      border-bottom-right-radius: 0;
+      border-top-right-radius: 0;
+    }
+    &[x-placement*='left'] {
+      border-left: none;
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0;
+    }
   }
 
   &:hover {
