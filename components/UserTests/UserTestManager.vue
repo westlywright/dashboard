@@ -3,52 +3,18 @@ import { AVAILABLE_USER_TESTS, mapPref } from '@/store/prefs';
 import { filterBy } from '@/utils/array';
 import isEmpty from 'lodash/isEmpty';
 import sortBy from 'lodash/sortBy';
-import clone from 'lodash/clone';
 
 export default {
   data() {
     return { activeUserTest: null, userTestPrefKey: AVAILABLE_USER_TESTS };
   },
-  computed: {
-    availabeUserTests: mapPref(AVAILABLE_USER_TESTS),
-    mappedUserTests() {
-      const availabeUserTests = this?.availabeUserTests
-        ? this.availabeUserTests.slice()
-        : [];
-      const out = [];
-
-      (availabeUserTests || []).forEach((t) => {
-        const test = clone(t);
-
-        if (!test?.start) {
-          test.start = () => {
-            this.$store.dispatch('utm/start', test);
-
-            // call the start function on the matomo target
-            console.log('started test', test.name);
-          };
-        }
-
-        if (!test?.finish) {
-          test.finish = () => {
-            this.$store.dispatch('utm/end');
-            // call the end function on the matomo target
-            console.log('finished test', test.name);
-          };
-        }
-
-        out.push(test);
-      });
-
-      return out;
-    },
-  },
-  watch: {
+  computed: { availabeUserTests: mapPref(AVAILABLE_USER_TESTS) },
+  watch:    {
     availabeUserTests() {
-      const { mappedUserTests } = this;
-      const runningTest = (mappedUserTests || []).find(mut => mut?.running);
+      const { availabeUserTests } = this;
+      const runningTest = (availabeUserTests || []).find(mut => mut?.isRunning);
       const untriggeredTests = sortBy(
-        filterBy(mappedUserTests || [], { triggered: false }),
+        filterBy(availabeUserTests || [], { triggered: false }),
         'rank'
       );
 
@@ -72,16 +38,14 @@ export default {
   },
   methods: {
     startUserTest() {
-      this.activeUserTest.start();
+      this.$store.dispatch('utm/start', this.activeUserTest);
 
       this.$modal.hide('user-test');
     },
     cancel() {
       this.$modal.hide('user-test');
 
-      if (this?.activeUserTest?.finish) {
-        this.activeUserTest.finish(); // if we can pass a message we should say `user cancelled`
-      }
+      this.$store.dispatch('utm/end');
     },
   },
 };
