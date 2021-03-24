@@ -12,21 +12,23 @@ import Header from '@/components/nav/Header';
 import Footer from '@/components/nav/Footer';
 import { COUNT, SCHEMA, MANAGEMENT } from '@/config/types';
 import { BASIC, FAVORITE, USED } from '@/store/type-map';
-import { addObjects, replaceWith, clear } from '@/utils/array';
+import { addObjects, replaceWith, clear, filterBy } from '@/utils/array';
 import { NAME as EXPLORER } from '@/config/product/explorer';
 import isEqual from 'lodash/isEqual';
+import UserTestManager from '@/components/UserTests/UserTestManager';
 
 export default {
 
   components: {
+    ActionMenu,
+    AssignTo,
+    Footer,
+    Group,
+    Header,
     Jump,
     PromptRemove,
-    AssignTo,
-    Header,
-    Footer,
-    ActionMenu,
-    Group,
-    WindowManager
+    UserTestManager,
+    WindowManager,
   },
 
   data() {
@@ -44,9 +46,9 @@ export default {
       return this.$store.getters['namespaces']();
     },
 
-    dev:            mapPref(DEV),
-    expandedGroups: mapPref(EXPANDED_GROUPS),
-    favoriteTypes:  mapPref(FAVORITE_TYPES),
+    dev:               mapPref(DEV),
+    expandedGroups:    mapPref(EXPANDED_GROUPS),
+    favoriteTypes:     mapPref(FAVORITE_TYPES),
 
     allSchemas() {
       const managementReady = this.$store.getters['managementReady'];
@@ -272,6 +274,9 @@ export default {
     <div class="wm">
       <WindowManager />
     </div>
+    <div class="user-tests">
+      <UserTestManager />
+    </div>
   </div>
 </template>
 
@@ -371,7 +376,8 @@ export default {
 
   }
 
-  .wm {
+  .wm,
+  .user-tests {
     grid-area: wm;
     overflow-y: hidden;
   }

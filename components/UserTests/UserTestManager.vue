@@ -1,0 +1,136 @@
+<script>
+import { AVAILABLE_USER_TESTS, mapPref } from '@/store/prefs';
+import { filterBy } from '@/utils/array';
+import isEmpty from 'lodash/isEmpty';
+import sortBy from 'lodash/sortBy';
+import clone from 'lodash/clone';
+
+export default {
+  data() {
+    return { activeUserTest: null, userTestPrefKey: AVAILABLE_USER_TESTS };
+  },
+  computed: {
+    availabeUserTests: mapPref(AVAILABLE_USER_TESTS),
+    mappedUserTests() {
+      const availabeUserTests = this?.availabeUserTests ? this.availabeUserTests.slice() : [];
+      const self = this;
+      const out = [];
+
+      (availabeUserTests || []).forEach((t) => {
+        const test = clone(t);
+
+        test.context = this;
+
+        if (!test?.start) {
+          test.start = () => {
+            const {
+              availabeUserTests,
+              activeUserTest: { name: activeUserTestName },
+            } = self;
+            const matched = availabeUserTests.find(
+              t => t.name === activeUserTestName
+            );
+
+            if (!isEmpty(matched)) {
+              matched.triggered = true;
+              matched.running = true;
+
+              self.$store.dispatch('prefs/set', {
+                key:   this.userTestPrefKey,
+                value: availabeUserTests,
+              });
+            }
+
+            // call the start function on the matomo target
+            console.log('started test', test.name);
+          };
+        }
+
+        if (!test?.finish) {
+          test.finish = () => {
+            // call the end function on the matomo target
+            console.log('finished test', test.name);
+          };
+        }
+
+        out.push(test);
+      });
+
+      return out;
+    },
+  },
+  watch: {
+    availabeUserTests() {
+      const { mappedUserTests } = this;
+      const untriggeredTests = sortBy(
+        filterBy(mappedUserTests || [], { triggered: false }),
+        'rank'
+      );
+
+      if (!isEmpty(untriggeredTests) && !isEmpty(untriggeredTests[0])) {
+        this.activeUserTest = untriggeredTests[0];
+
+        if (!this.activeUserTest.running) {
+          this.$nextTick(() => {
+            this.$modal.show('user-test');
+          });
+        }
+      }
+    },
+  },
+  methods: {
+    startUserTest() {
+      this.activeUserTest.start();
+
+      this.$modal.hide('user-test');
+    },
+    cancel() {
+      this.$modal.hide('user-test');
+
+      if (this?.activeUserTest?.finish) {
+        this.activeUserTest.finish(); // if we can pass a message we should say `user cancelled`
+      }
+    },
+  },
+};
+</script>
+
+<template>
+  <modal
+    v-if="activeUserTest"
+    class="modal-user-test"
+    name="user-test"
+    :width="440"
+    height="auto"
+    :scrollable="true"
+  >
+    <div class="header">
+      <h4 class="text-default-text">
+        <span>{{ activeUserTest.title }}</span>
+      </h4>
+    </div>
+    <div class="body">
+      <p>
+        {{ activeUserTest.content }}
+      </p>
+    </div>
+    <div class="footer">
+      <button type="button" class="btn role-primary" @click="startUserTest">
+        Start
+      </button>
+      <button type="button" class="btn role-secondary" @click="cancel">
+        Cancel
+      </button>
+    </div>
+  </modal>
+</template>
+
+<style lang="scss" scoped>
+.modal-user-test {
+  .v--modal-box {
+    .header {
+      background-color: var(--info);
+    }
+  }
+}
+</style>

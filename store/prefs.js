@@ -66,6 +66,7 @@ export const LANDING = create('landing', '', { parseJSON, options: ['ember', 'vu
 export const HIDE_REPOS = create('hide-repos', [], { parseJSON });
 export const HIDE_DESC = create('hide-desc', [], { parseJSON });
 export const HIDE_SENSITIVE = create('hide-sensitive', true, { options: [true, false], parseJSON });
+export const AVAILABLE_USER_TESTS = create('available-user-tests', [], { parseJSON });
 
 export const DATE_FORMAT = create('date-format', 'ddd, MMM D YYYY', {
   options: [

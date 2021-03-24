@@ -2,7 +2,9 @@ import Steve from '@/plugins/steve';
 import {
   COUNT, NAMESPACE, NORMAN, MANAGEMENT, FLEET
 } from '@/config/types';
-import { CLUSTER as CLUSTER_PREF, NAMESPACE_FILTERS, LAST_NAMESPACE, WORKSPACE } from '@/store/prefs';
+import {
+  AVAILABLE_USER_TESTS, CLUSTER as CLUSTER_PREF, NAMESPACE_FILTERS, LAST_NAMESPACE, WORKSPACE
+} from '@/store/prefs';
 import { allHash, allHashSettled } from '@/utils/promise';
 import { ClusterNotFoundError, ApiError } from '@/utils/error';
 import { sortBy } from '@/utils/sort';
@@ -10,6 +12,7 @@ import { filterBy, findBy } from '@/utils/array';
 import { BOTH, CLUSTER_LEVEL, NAMESPACED } from '@/store/type-map';
 import { NAME as EXPLORER } from '@/config/product/explorer';
 import { TIMED_OUT } from '@/config/query-params';
+import { isEmpty } from 'lodash';
 
 // Disables strict mode for all store instances to prevent warning about changing state outside of mutations
 // becaues it's more efficient to do that sometimes.
@@ -438,6 +441,25 @@ export const actions = {
 
     if ( res.clusters.length === 1 && res.clusters[0].metadata?.name === 'local' ) {
       isMultiCluster = false;
+    }
+
+    if (isEmpty(getters['prefs/get'](AVAILABLE_USER_TESTS))) {
+      dispatch('prefs/set', {
+        key:   AVAILABLE_USER_TESTS,
+        value: [{
+          content:      'Thank you for participating in our user feedback session. For this activity we would like you to launch an app. The specific app does not matter. When you are finished you may select the `end user test` button somewhere on the page. Thank you for your time!',
+          isFinished:   false,
+          isRunning:    false,
+          matomoTarget: '',
+          name:         'install-chart',
+          nextTest:     -1,
+          rank:         1,
+          title:        'User Test - Chart Installation',
+          triggered:    false,
+        }],
+      });
+    } else {
+
     }
 
     commit('managementChanged', {

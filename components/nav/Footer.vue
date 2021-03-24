@@ -1,8 +1,10 @@
 <script>
 import { mapGetters } from 'vuex';
 import { options } from '@/config/footer';
-import { mapPref, DEV } from '@/store/prefs';
+import { AVAILABLE_USER_TESTS, mapPref, DEV } from '@/store/prefs';
 import { MANAGEMENT } from '@/config/types';
+import { filterBy } from '@/utils/array';
+import isEmpty from 'lodash/isEmpty';
 
 const UNKNOWN = 'unknown';
 const UI_VERSION = process.env.VERSION || UNKNOWN;
@@ -23,15 +25,18 @@ export default {
     return {
       displayVersion,
       fullVersion,
-      uiCommit:       UI_COMMIT,
-      uiVersion:      UI_VERSION
+      activeUserTest:  null,
+      userTestRunning: false,
+      uiCommit:        UI_COMMIT,
+      uiVersion:       UI_VERSION
     };
   },
 
   computed: {
     ...mapGetters('i18n', ['selectedLocaleLabel', 'availableLocales']),
 
-    dev: mapPref(DEV),
+    dev:               mapPref(DEV),
+    availabeUserTests: mapPref(AVAILABLE_USER_TESTS),
 
     showLocale() {
       return Object.keys(this.availableLocales).length > 1 || this.dev;
@@ -64,7 +69,35 @@ export default {
     }
   },
 
+  watch:    {
+    availabeUserTests() {
+      const { availabeUserTests } = this;
+      const started = filterBy(availabeUserTests || [], { triggered: true, running: true });
+
+      if (!isEmpty(started)) {
+        this.activeUserTest = started;
+        this.userTestRunning = true;
+      }
+    },
+  },
+
   methods: {
+    async endUserTest() {
+      const { availabeUserTests } = this;
+      const activeUserTest = availabeUserTests.find(at => at?.running );
+
+      if (!isEmpty(activeUserTest)) {
+        activeUserTest.triggered = true;
+        activeUserTest.running = false;
+        activeUserTest.isFinished = true;
+
+        await this.$store.dispatch('prefs/set', { key: AVAILABLE_USER_TESTS, value: this.availabeUserTests });
+
+        this.userTestRunning = false;
+        // todo start next?
+        this.activeUserTest = null;
+      }
+    },
     switchLocale(locale) {
       this.$store.dispatch('i18n/switchTo', locale);
     }
@@ -80,6 +113,10 @@ export default {
     <div v-for="(value, name) in options" :key="name">
       <a v-t="name" :href="value" target="_blank" />
     </div>
+
+    <button v-if="activeUserTest" class="btn bg-transparent text-error" style="padding-top: 3px;" type="button" @click="endUserTest">
+      End User Test
+    </button>
 
     <div class="space" />
 

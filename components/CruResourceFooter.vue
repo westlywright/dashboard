@@ -134,38 +134,12 @@ export default {
     margin-left: 20px;
   }
 }
-.confirm-modal {
-  .btn {
-    margin: 0 10px;
-  }
 
+.confirm-modal {
   .v--modal-box {
     background-color: var(--default);
-    box-shadow: none;
-    min-height: 200px;
-    .body {
-      min-height: 75px;
-      padding: 10px 0 0 15px;
-      p {
-        margin-top: 10px;
-      }
-    }
     .header {
       background-color: var(--error);
-      padding: 15px 0 0 15px;
-
-      h4 {
-        color: white;
-      }
-    }
-    .header,
-    .footer {
-      height: 50px;
-    }
-    .footer {
-      border-top: 1px solid var(--border);
-      text-align: center;
-      padding: 10px 0 0 15px;
     }
   }
 }
