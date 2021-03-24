@@ -335,6 +335,10 @@ export default {
     };
   },
 
+  created() {
+    this.registerAfterHook(this.cleanupUserTests);
+  },
+
   computed: {
     ...mapGetters(['currentCluster', 'isRancher']),
 
@@ -528,7 +532,9 @@ export default {
 
   methods: {
     stringify,
-
+    cleanupUserTests() {
+      debugger;
+    },
     async loadValuesComponent() {
       // TODO: Remove RELEASE_NAME. This is only in until the component annotation is added to the OPA Gatekeeper chart
       const component = this.version?.annotations?.[CATALOG_ANNOTATIONS.COMPONENT] || this.version?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME];

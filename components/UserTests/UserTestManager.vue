@@ -12,34 +12,17 @@ export default {
   computed: {
     availabeUserTests: mapPref(AVAILABLE_USER_TESTS),
     mappedUserTests() {
-      const availabeUserTests = this?.availabeUserTests ? this.availabeUserTests.slice() : [];
-      const self = this;
+      const availabeUserTests = this?.availabeUserTests
+        ? this.availabeUserTests.slice()
+        : [];
       const out = [];
 
       (availabeUserTests || []).forEach((t) => {
         const test = clone(t);
 
-        test.context = this;
-
         if (!test?.start) {
           test.start = () => {
-            const {
-              availabeUserTests,
-              activeUserTest: { name: activeUserTestName },
-            } = self;
-            const matched = availabeUserTests.find(
-              t => t.name === activeUserTestName
-            );
-
-            if (!isEmpty(matched)) {
-              matched.triggered = true;
-              matched.running = true;
-
-              self.$store.dispatch('prefs/set', {
-                key:   this.userTestPrefKey,
-                value: availabeUserTests,
-              });
-            }
+            this.$store.dispatch('utm/start', test);
 
             // call the start function on the matomo target
             console.log('started test', test.name);
@@ -48,6 +31,7 @@ export default {
 
         if (!test?.finish) {
           test.finish = () => {
+            this.$store.dispatch('utm/end');
             // call the end function on the matomo target
             console.log('finished test', test.name);
           };
@@ -62,19 +46,27 @@ export default {
   watch: {
     availabeUserTests() {
       const { mappedUserTests } = this;
+      const runningTest = (mappedUserTests || []).find(mut => mut?.running);
       const untriggeredTests = sortBy(
         filterBy(mappedUserTests || [], { triggered: false }),
         'rank'
       );
 
+      if (!isEmpty(runningTest)) {
+        this.activeUserTest = runningTest;
+        this.$store.commit('utm/setActiveTest', runningTest);
+        this.$store.commit('utm/setRunning', true);
+
+        return;
+      }
+
       if (!isEmpty(untriggeredTests) && !isEmpty(untriggeredTests[0])) {
         this.activeUserTest = untriggeredTests[0];
+        this.$store.commit('utm/setActiveTest', untriggeredTests[0]);
 
-        if (!this.activeUserTest.running) {
-          this.$nextTick(() => {
-            this.$modal.show('user-test');
-          });
-        }
+        this.$nextTick(() => {
+          this.$modal.show('user-test');
+        });
       }
     },
   },

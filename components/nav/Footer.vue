@@ -72,7 +72,7 @@ export default {
   watch:    {
     availabeUserTests() {
       const { availabeUserTests } = this;
-      const started = filterBy(availabeUserTests || [], { triggered: true, running: true });
+      const started = filterBy(availabeUserTests || [], { triggered: true, isRunning: true });
 
       if (!isEmpty(started)) {
         this.activeUserTest = started;
@@ -82,21 +82,11 @@ export default {
   },
 
   methods: {
-    async endUserTest() {
-      const { availabeUserTests } = this;
-      const activeUserTest = availabeUserTests.find(at => at?.running );
+    endUserTest() {
+      this.$store.dispatch('utm/end');
 
-      if (!isEmpty(activeUserTest)) {
-        activeUserTest.triggered = true;
-        activeUserTest.running = false;
-        activeUserTest.isFinished = true;
-
-        await this.$store.dispatch('prefs/set', { key: AVAILABLE_USER_TESTS, value: this.availabeUserTests });
-
-        this.userTestRunning = false;
-        // todo start next?
-        this.activeUserTest = null;
-      }
+      this.userTestRunning = false;
+      this.activeUserTest = null;
     },
     switchLocale(locale) {
       this.$store.dispatch('i18n/switchTo', locale);
