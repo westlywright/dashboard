@@ -72,7 +72,7 @@ export default {
   watch:    {
     availabeUserTests() {
       const { availabeUserTests } = this;
-      const started = filterBy(availabeUserTests || [], { triggered: true, isRunning: true });
+      const started = filterBy(availabeUserTests || [], { triggered: true, running: true });
 
       if (!isEmpty(started)) {
         this.activeUserTest = started;

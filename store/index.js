@@ -448,8 +448,8 @@ export const actions = {
         key:   AVAILABLE_USER_TESTS,
         value: [{
           content:      'Thank you for participating in our user feedback session. For this activity we would like you to launch an app. The specific app does not matter. When you are finished you may select the `end user test` button somewhere on the page. Thank you for your time!',
-          isFinished:   false,
-          isRunning:    false,
+          finished:     false,
+          running:      false,
           matomoTarget: '',
           name:         'install-chart',
           nextTest:     -1,

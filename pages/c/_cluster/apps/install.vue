@@ -30,6 +30,7 @@ import { findBy, insertAt } from '@/utils/array';
 import ChildHook, { BEFORE_SAVE_HOOKS, AFTER_SAVE_HOOKS } from '@/mixins/child-hook';
 import sortBy from 'lodash/sortBy';
 import { formatSi, parseSi } from '@/utils/units';
+import UserTestFinisher from '@/components/UserTests/UserTestFinisher';
 
 export default {
   name: 'Install',
@@ -48,6 +49,7 @@ export default {
     Tab,
     Tabbed,
     UnitInput,
+    UserTestFinisher,
     YamlEditor,
   },
 
@@ -335,10 +337,6 @@ export default {
     };
   },
 
-  created() {
-    this.registerAfterHook(this.cleanupUserTests);
-  },
-
   computed: {
     ...mapGetters(['currentCluster', 'isRancher']),
 
@@ -532,9 +530,6 @@ export default {
 
   methods: {
     stringify,
-    cleanupUserTests() {
-      debugger;
-    },
     async loadValuesComponent() {
       // TODO: Remove RELEASE_NAME. This is only in until the component annotation is added to the OPA Gatekeeper chart
       const component = this.version?.annotations?.[CATALOG_ANNOTATIONS.COMPONENT] || this.version?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME];
@@ -1132,6 +1127,7 @@ export default {
         </CruResourceFooter>
       </div>
     </template>
+    <UserTestFinisher @registerAfterHook="registerAfterHook" />
   </form>
 </template>
 

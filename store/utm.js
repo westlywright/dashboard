@@ -30,7 +30,7 @@ export const actions = {
 
     if (!isEmpty(matched)) {
       matched.triggered = true;
-      matched.isRunning = true;
+      matched.running = true;
 
       dispatch('prefs/set', {
         key:   AVAILABLE_USER_TESTS,
@@ -48,8 +48,8 @@ export const actions = {
     const matched = availableUserTests.find(t => t.name === activeTest?.name);
 
     if (!isEmpty(matched)) {
-      matched.isFinished = true;
-      matched.isRunning = false;
+      matched.finished = true;
+      matched.running = false;
       matched.triggered = true;
 
       dispatch('prefs/set', {

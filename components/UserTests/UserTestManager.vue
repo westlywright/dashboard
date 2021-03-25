@@ -12,7 +12,7 @@ export default {
   watch:    {
     availabeUserTests() {
       const { availabeUserTests } = this;
-      const runningTest = (availabeUserTests || []).find(mut => mut?.isRunning);
+      const runningTest = (availabeUserTests || []).find(mut => mut?.running);
       const untriggeredTests = sortBy(
         filterBy(availabeUserTests || [], { triggered: false }),
         'rank'
