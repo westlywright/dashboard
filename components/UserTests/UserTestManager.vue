@@ -2,7 +2,6 @@
 import { AVAILABLE_USER_TESTS, mapPref } from '@/store/prefs';
 import { filterBy } from '@/utils/array';
 import isEmpty from 'lodash/isEmpty';
-import sortBy from 'lodash/sortBy';
 
 export default {
   data() {
@@ -13,10 +12,7 @@ export default {
     availabeUserTests() {
       const { availabeUserTests } = this;
       const runningTest = (availabeUserTests || []).find(mut => mut?.running);
-      const untriggeredTests = sortBy(
-        filterBy(availabeUserTests || [], { triggered: false }),
-        'rank'
-      );
+      const untriggeredTests = filterBy(availabeUserTests || [], { finished: false, running: false });
 
       if (!isEmpty(runningTest)) {
         this.activeUserTest = runningTest;

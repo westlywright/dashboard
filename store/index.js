@@ -446,20 +446,27 @@ export const actions = {
     if (isEmpty(getters['prefs/get'](AVAILABLE_USER_TESTS))) {
       dispatch('prefs/set', {
         key:   AVAILABLE_USER_TESTS,
-        value: [{
-          content:      'Thank you for participating in our user feedback session. For this activity we would like you to launch an app. The specific app does not matter. When you are finished you may select the `end user test` button somewhere on the page. Thank you for your time!',
-          finished:     false,
-          running:      false,
-          matomoTarget: '',
-          name:         'install-chart',
-          nextTest:     -1,
-          rank:         1,
-          title:        'User Test - Chart Installation',
-          triggered:    false,
-        }],
+        value: [
+          {
+            content:    'Thank you for participating in our user feedback session. For this activity we would like you to launch an app. The specific app does not matter. If you would like to end the test early you may select the button in the footer. Thank you for your time!',
+            finished:   false,
+            name:       'installChart',
+            running:    false,
+            title:      'User Test - Chart Installation',
+            trackEvent: '',
+            trackGoal:  '',
+          },
+          {
+            content:    'Thank you for participating in our user feedback session. For this activity we would like you to launch a deployment type workload. If you would like to end the test early you may select the button in the footer. Thank you for your time!',
+            finished:   false,
+            name:       'createWorkload',
+            running:    false,
+            title:      'User Test - Create Workload',
+            trackEvent: '',
+            trackGoal:  '',
+          }
+        ],
       });
-    } else {
-
     }
 
     commit('managementChanged', {
