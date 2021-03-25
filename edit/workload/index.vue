@@ -31,6 +31,7 @@ import Command from '@/components/form/Command';
 import Storage from '@/edit/workload/storage';
 import Labels from '@/components/form/Labels';
 import { UI_MANAGED } from '@/config/labels-annotations';
+import UserTestFinisher from '@/components/UserTests/UserTestFinisher';
 
 export default {
   name:       'CruWorkload',
@@ -57,6 +58,7 @@ export default {
     Storage,
     VolumeClaimTemplate,
     Labels,
+    UserTestFinisher,
   },
 
   mixins: [CreateEditView],
@@ -812,6 +814,7 @@ export default {
         </Tab>
       </Tabbed>
     </CruResource>
+    <UserTestFinisher @registerAfterHook="registerAfterHook" />
   </form>
 </template>
 

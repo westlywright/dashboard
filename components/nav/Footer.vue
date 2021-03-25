@@ -74,7 +74,12 @@ export default {
       const { availabeUserTests } = this;
       const started = filterBy(availabeUserTests || [], { finished: false, running: true });
 
-      if (!isEmpty(started)) {
+      if (isEmpty(started)) {
+        if (this.activeUserTest && this.userTestRunning) {
+          this.activeUserTest = null;
+          this.userTestRunning = false;
+        }
+      } else {
         this.activeUserTest = started;
         this.userTestRunning = true;
       }

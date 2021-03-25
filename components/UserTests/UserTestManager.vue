@@ -39,9 +39,9 @@ export default {
       this.$modal.hide('user-test');
     },
     cancel() {
-      this.$modal.hide('user-test');
-
       this.$store.dispatch('utm/end');
+
+      this.$modal.hide('user-test');
     },
   },
 };
