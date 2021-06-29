@@ -878,6 +878,9 @@ cluster:
       label: Registration Command
       detail: Run this command on each of the existing machines you want to register.
       insecure: "Insecure: Select this to skip TLS verification if your server has a self-signed certificate."
+    nodeType:
+      label: Node Type
+      detail: Choose what operating system this node will run in. etcd and Control Plane nodes can only run under a Linux environment.
   credential:
     aws:
       accessKey:
@@ -2584,7 +2587,7 @@ probe:
     placeholder: Select a check type
 
 project:
-  members: 
+  members:
     label: Members
     user: User
     role: Role
@@ -4601,7 +4604,7 @@ featureFlags:
     Some features require a restart of the {vendor} server to change.
     This will result in a short outage of the API and UI, but not affect running clusters or workloads.
   promptActivate: Please confirm that you want to activate the feature flag "{flag}"
-  promptDeactivate: Please confirm that you want to deactivate the feature flag "{flag}"    
+  promptDeactivate: Please confirm that you want to deactivate the feature flag "{flag}"
   restartRequired: "Note: Updating this feature flag requires a restart"
   restart:
     title: Waiting for Restart
