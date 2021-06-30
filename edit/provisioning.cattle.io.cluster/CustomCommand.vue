@@ -6,6 +6,7 @@ import LabeledInput from '@/components/form/LabeledInput';
 import KeyValue from '@/components/form/KeyValue';
 import Taints from '@/components/form/Taints';
 import RadioGroup from '@/components/form/RadioGroup';
+const semver = require('semver');
 
 export default {
   components: {
@@ -16,27 +17,49 @@ export default {
     clusterToken: {
       type:     Object,
       required: true,
-    }
+    },
+    cluster: {
+      type:     Object,
+      required: true,
+    },
+
   },
 
   data() {
     return {
-      nodeOsTypes:     [{ label: 'Linux', value: 'linux' }, { label: 'Windows', value: 'windows' }],
-      nodeOsType:      'linux', // current design states cluster won't have a windows specific parameter, the only way to find this would be to look up additional windows kubelet args but those are currently unknown.
-      showAdvanced:    false,
-      etcd:            true,
-      controlPlane:    true,
-      worker:          true,
-      insecure:        false,
-      address:         '',
-      internalAddress: '',
-      nodeName:        '',
-      labels:          {},
-      taints:          []
+      nodeOsTypes:          [{ label: 'Linux', value: 'linux' }, { label: 'Windows', value: 'windows' }],
+      nodeOsType:           'linux', // current design states cluster won't have a windows specific parameter, the only way to find this would be to look up additional windows kubelet args but those are currently unknown.
+      showAdvanced:         false,
+      etcd:                 true,
+      controlPlane:         true,
+      worker:               true,
+      insecure:             false,
+      minKubernetesVersion: 'v1.21.2+rke2r1', // not sure the exact version, this is currently the latest version though.
+      address:              '',
+      internalAddress:      '',
+      nodeName:             '',
+      labels:               {},
+      taints:               []
     };
   },
 
   computed: {
+    cniIsCalico() {
+      if (!this.cluster.isCustom) {
+        return false;
+      }
+
+      return this.cluster?.spec?.rkeConfig?.controlPlaneConfig?.cni === 'calico';
+    },
+    showWindowsOpts() {
+      const meetsRangeCheck = semver.gte(this.cluster.kubernetesVersion, this.minKubernetesVersion, { loose: true, includePrerelease: true });
+
+      if (meetsRangeCheck && this.cniIsCalico) {
+        return true;
+      }
+
+      return false;
+    },
     command() {
       const windowsCmdPostfix = ` | iex}"`;
       let out;
@@ -83,6 +106,15 @@ export default {
     isWindows() {
       return this.nodeOsType === 'windows';
     },
+    finalStepCount() {
+      if (this.showWindowsOpts && this.showAdvanced) {
+        return 4;
+      } else if (( this.showWindowsOpts && !this.showAdvanced ) || ( !this.showWindowsOpts && this.showAdvanced )) {
+        return 3;
+      } else {
+        return 2;
+      }
+    },
   },
 
   watch: {
@@ -112,7 +144,7 @@ function sanitizeValue(v) {
 
 <template>
   <div>
-    <InfoBox :step="1" class="step-box">
+    <InfoBox v-if="showWindowsOpts" :step="1" class="step-box">
       <h3 v-t="'cluster.custom.nodeType.label'" />
       <h4 v-t="'cluster.custom.nodeType.detail'" />
       <RadioGroup
@@ -122,15 +154,15 @@ function sanitizeValue(v) {
       />
     </InfoBox>
 
-    <InfoBox :step="2" class="step-box">
+    <InfoBox :step="showWindowsOpts ? 2 : 1" class="step-box">
       <h3 v-t="'cluster.custom.nodeRole.label'" />
       <h4 v-t="'cluster.custom.nodeRole.detail'" />
       <Checkbox v-model="etcd" :disabled="isWindows" label-key="model.machine.role.etcd" />
       <Checkbox v-model="controlPlane" :disabled="isWindows" label-key="model.machine.role.controlPlane" />
-      <Checkbox v-model="worker" label-key="model.machine.role.worker" />
+      <Checkbox v-model="worker" :disabled="isWindows" label-key="model.machine.role.worker" />
     </InfoBox>
 
-    <InfoBox v-if="showAdvanced" :step="3" class="step-box">
+    <InfoBox v-if="showAdvanced" :step="showWindowsOpts ? 3 : 2" class="step-box">
       <h3 v-t="'cluster.custom.advanced.label'" />
       <h4 v-t="'cluster.custom.advanced.detail'" />
 
@@ -157,7 +189,7 @@ function sanitizeValue(v) {
       <a v-t="'generic.showAdvanced'" @click="toggleAdvanced" />
     </div>
 
-    <InfoBox :step="showAdvanced ? 4 : 3" class="step-box">
+    <InfoBox :step="finalStepCount" class="step-box">
       <h3 v-t="'cluster.custom.registrationCommand.label'" />
       <h4 v-t="'cluster.custom.registrationCommand.detail'" />
       <CopyCode class="m-10 p-10">
